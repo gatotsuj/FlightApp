@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('flight_segments', function (Blueprint $table) {
             $table->id();
-            $table->integer('squence');
+            $table->integer('sequence');
             $table->foreignId('flight_id')->constrained('flights')->onDelete('cascade');
             $table->foreignId('airport_id')->constrained('airports')->onDelete('cascade');
             $table->dateTime('time');
