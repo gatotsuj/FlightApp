@@ -18,4 +18,9 @@ class PromoCode extends Model
         'valid_until',
         'is_used',
     ];
+
+    public function transactions()
+    {
+        return $this->hasOne(Transaction::class);
+    }
 }
