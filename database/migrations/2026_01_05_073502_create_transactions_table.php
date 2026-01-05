@@ -13,6 +13,18 @@ return new class extends Migration
     {
         Schema::create('transactions', function (Blueprint $table) {
             $table->id();
+            $table->string('code')->unique();
+            $table->foreignId('flight_id')->constrained()->onDelete('cascade');
+            $table->foreignId('flight_class_id')->constrained()->onDelete('cascade');
+            $table->string('name');
+            $table->string('email');
+            $table->string('phone');
+            $table->integer('number_of_passengers', false, true);
+            $table->foreignId('promo_code_id')->nullable()->constrained()->onDelete('set null');
+            $table->enum('payment_status', ['pending', 'paid', 'failed'])->default('pending');
+            $table->decimal('subtotal', 10, 2)->nullable();
+            $table->decimal('grand_total', 10, 2)->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }
