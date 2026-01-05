@@ -24,11 +24,9 @@ class FlightResource extends Resource
     {
         return $form
             ->schema([
-                //
                 Wizard::make([
                     Wizard\Step::make('Flight Information')
                         ->schema([
-                            //
                             TextInput::make('flight_number')
                                 ->label('Flight Number')
                                 ->unique(ignoreRecord: true)
@@ -38,6 +36,7 @@ class FlightResource extends Resource
                                     'unique' => 'The Flight Number has already been taken.',
                                 ])
                                 ->maxLength(20),
+
                             Select::make('airline_id')
                                 ->relationship('airline', 'name')
                                 ->placeholder('Select Airline')
@@ -46,8 +45,8 @@ class FlightResource extends Resource
                                     'required' => 'The Airline field is required.',
                                 ])
                                 ->label('Airline'),
-                        ])
-                        ->columns(2),
+                        ]),
+
                     Wizard\Step::make('Flight Segments')
                         ->schema([
                             Repeater::make('flight_segments')
@@ -62,6 +61,7 @@ class FlightResource extends Resource
                                             'required' => 'The Sequence Number field is required.',
                                         ])
                                         ->maxLength(100),
+
                                     Select::make('airport_id')
                                         ->relationship('airport', 'name')
                                         ->placeholder('Select Airport')
@@ -70,6 +70,7 @@ class FlightResource extends Resource
                                         ->validationMessages([
                                             'required' => 'The Airport field is required.',
                                         ]),
+
                                     DateTimePicker::make('time')
                                         ->label('Time')
                                         ->required()
@@ -77,11 +78,10 @@ class FlightResource extends Resource
                                             'required' => 'The Departure Time field is required.',
                                         ]),
                                 ]),
-                        ])
-                        ->columns(2),
+                        ]),
+
                     Wizard\Step::make('Flight Classes')
                         ->schema([
-                            //
                             Repeater::make('flight_classes')
                                 ->label('Flight Classes')
                                 ->relationship('classes')
@@ -91,12 +91,12 @@ class FlightResource extends Resource
                                         ->options([
                                             'economy' => 'Economy',
                                             'business' => 'Business',
-
                                         ])
                                         ->required()
                                         ->validationMessages([
                                             'required' => 'The Class Type field is required.',
                                         ]),
+
                                     TextInput::make('price')
                                         ->label('Price')
                                         ->numeric()
@@ -120,19 +120,18 @@ class FlightResource extends Resource
 
                                     Select::make('facilities')
                                         ->label('Facilities')
-                                        ->relationship('facilities', 'name') // relasi di FlightClass
+                                        ->relationship('facilities', 'name')
                                         ->multiple()
-                                        ->searchable()   // Bisa cari
+                                        ->searchable()
                                         ->placeholder('Select Facilities')
                                         ->required()
                                         ->validationMessages([
                                             'required' => 'The Facilities field is required.',
                                         ]),
                                 ]),
-
-                        ])
-                        ->columns(2),
-                ]),
+                        ]),
+                ])
+                    ->columnSpanFull(), // Tambahkan ini untuk full width
             ]);
     }
 
@@ -141,12 +140,28 @@ class FlightResource extends Resource
         return $table
             ->columns([
                 //
+                Tables\Columns\TextColumn::make('flight_number')->label('Flight Number')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('airline.name')->label('Airline')->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('segments')
+                    ->label('Route And Duration')
+                    ->formatStateUsing(function ($state, $record) {
+                        $firstSegment = $record->segments->sortBy('sequence')->first();
+                        $lastSegment = $record->segments->sortBy('sequence')->last();
+                        $route = $firstSegment->airport->iata_code.' - '.$lastSegment->airport->iata_code;
+                        $duration = (new \DateTime($lastSegment->time))->format('d F Y H:i').' - '.(new \DateTime($firstSegment->time))->format('d F Y H:i');
+
+                        return $route.' | '.$duration;
+                    })
+                    ->searchable()
+                    ->sortable(),
             ])
             ->filters([
                 //
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\ViewAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
