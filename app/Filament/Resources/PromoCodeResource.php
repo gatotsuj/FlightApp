@@ -19,7 +19,9 @@ class PromoCodeResource extends Resource
 {
     protected static ?string $model = PromoCode::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-banknotes';
+
+    protected static ?int $navigationSort = 4;
 
     public static function form(Form $form): Form
     {
@@ -35,6 +37,7 @@ class PromoCodeResource extends Resource
                         'unique' => 'The Promo Code has already been taken.',
                     ])
                     ->maxLength(50),
+
                 Select::make('discount_type')
                     ->label('Discount Type')
                     ->options([
@@ -42,6 +45,7 @@ class PromoCodeResource extends Resource
                         'fixed' => 'Fixed Amount',
                     ])
                     ->required()
+                    ->live() // Tambahkan ini agar perubahan langsung terdeteksi
                     ->validationMessages([
                         'required' => 'The Discount Type field is required.',
                     ]),
@@ -51,11 +55,10 @@ class PromoCodeResource extends Resource
                     ->numeric()
                     ->required()
                     ->minValue(0)
-                    ->maxValue(fn (Get $get) => $get('discount_type') === 'percentage' ? 100 : null
-                    )
+                    ->maxValue(fn (Get $get) => $get('discount_type') === 'percentage' ? 100 : null)
                     ->helperText(fn (Get $get) => $get('discount_type') === 'percentage'
-                            ? 'Value must be between 0 and 100%'
-                            : 'Enter fixed discount amount'
+                        ? 'Value must be between 0 and 100%'
+                        : 'Enter fixed discount amount'
                     )
                     ->validationMessages([
                         'required' => 'The Discount Value field is required.',

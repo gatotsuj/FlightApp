@@ -24,4 +24,9 @@ class FlightSeat extends Model
     {
         return $this->belongsTo(Flight::class);
     }
+
+    public function passengers()
+    {
+        return $this->hasMany(TransactionPassenger::class);
+    }
 }
